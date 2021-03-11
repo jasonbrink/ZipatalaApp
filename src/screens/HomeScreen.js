@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { getDistance } from 'geolib';
@@ -9,15 +9,14 @@ import HealthFacilityImage from '../components/HealthFacilityImage'
 import {Picker} from '@react-native-picker/picker';
 
 const HomeScreen = ({ navigation }) => {
-	const [zipatalaData, setZipatalaData] = useState([]);
+	const [zipatalaDataComplete, setZipatalaDataComplete] = useState([]);
 	const [messageZipatala, setMessageZipatala] = useState('Waiting for Zipatala data...');
 	const [location, setLocation] = useState(null);
 	const [errorMsgLoc, setErrorMsgLoc] = useState('');
 	const [dataSorted, setDataSorted] = useState(false);
 	const [filterDialogVisible, setFilterDialogVisible] = useState(false);
+	const [facilityFilter, setFacilityFilter] = useState(null);
 	
-	const [selectedFacilityType, setSelectedFacilityType] = useState();
-
 	const _MAX_FACILITIES = 50;
 
 	/*
@@ -27,21 +26,21 @@ const HomeScreen = ({ navigation }) => {
 		console.log('Starting sortZipatala');
 		
 		/* First, ensure we have zipatala data AND location information */
-		if (zipatalaData.length == 0 || !location) {
+		if (zipatalaDataComplete.length == 0 || !location) {
 			console.log('Abandoning sort as some data is not present');
-			console.log('Zipatala data length: ' + zipatalaData.length);
+			console.log('Zipatala data length: ' + zipatalaDataComplete.length);
 			console.log(location);
 			return;
 		}
 
 		/* Add distance information to the whole list of businesses */
-		const withDist = zipatalaData.map((item) => {
+		const withDist = zipatalaDataComplete.map((item) => {
 			item.dist = getDistance(location.coords, {lat: item.latitude, lng: item.longitude});
 			return item;
 		});
 
 		/* Finally, sort by distance */
-		setZipatalaData(withDist.sort( (a, b) => a.dist - b.dist ) );
+		setZipatalaDataComplete(withDist.sort( (a, b) => a.dist - b.dist ) );
 		
 		setDataSorted(true);
 	};
@@ -52,7 +51,7 @@ const HomeScreen = ({ navigation }) => {
 	const getZipatalaData = async() => {
 		try {
 			/*const response = await zipatala.get('/facilities/list');*/
-			/*setZipatalaData(response.data.data);*/
+			/*setZipatalaDataComplete(response.data.data);*/
 			
 			/* Load data from an asset file first */
 			const response = require('../../assets/zipatala-facilities.json');
@@ -62,7 +61,7 @@ const HomeScreen = ({ navigation }) => {
 				return result.status == 'Functional';
 			});
 			
-			setZipatalaData(_zipatalaData);
+			setZipatalaDataComplete(_zipatalaData);
 
 			setMessageZipatala('');
 			
@@ -111,6 +110,12 @@ const HomeScreen = ({ navigation }) => {
 		navigation.setParams({setFilterDialogVisible: setFilterDialogVisible});
 	}, []);
 
+	useEffect(() => {
+		console.log("Facility filter:");
+		console.log(facilityFilter);
+	}, [facilityFilter]);
+
+
 	let locationText = 'Attempting to find your location...';
 	if (errorMsgLoc) {
 		locationText = errorMsgLoc;
@@ -118,7 +123,7 @@ const HomeScreen = ({ navigation }) => {
 		locationText = 'Got location! Lat: ' + location.coords.latitude + ' / Long: ' + location.coords.longitude;
 	}
 	
-	if (zipatalaData.length > 0 && location && !dataSorted) {
+	if (zipatalaDataComplete.length > 0 && location && !dataSorted) {
 		/* Attempt to sort by distance */
 		sortZipatalaByDistance();
 	}
@@ -128,12 +133,19 @@ const HomeScreen = ({ navigation }) => {
 		<FilterDialog 
 			dialogVisible={filterDialogVisible}
 			setDialogVisible={visible => setFilterDialogVisible(visible)}
+			facilityFilter={facilityFilter}
+			setFacilityFilter={setFacilityFilter}
 		/>
-
+		
 		<Text>{locationText}</Text>
-		{zipatalaData.length == 0 ? <Text>{messageZipatala}</Text> : 
+
+		{ !location && !errorMsgLoc &&
+		<ActivityIndicator />
+		}
+
+		{zipatalaDataComplete.length == 0 ? <Text>{messageZipatala}</Text> : 
 		<FlatList
-			data={zipatalaData.slice(0, Math.min(zipatalaData.length, _MAX_FACILITIES))}
+			data={zipatalaDataComplete.slice(0, Math.min(zipatalaDataComplete.length, _MAX_FACILITIES))}
 			keyExtractor={(facility) => facility.code}
 			renderItem={({ item }) => {
 				return (
@@ -175,7 +187,7 @@ const HomeScreen = ({ navigation }) => {
 			}}
 		/>
 		}
-		{zipatalaData.length > _MAX_FACILITIES &&
+		{zipatalaDataComplete.length > _MAX_FACILITIES &&
 		<Text>Maximum of {_MAX_FACILITIES} shown. Use filters to further restrict your search.</Text>
 		}
 	</View>
@@ -228,7 +240,8 @@ const styles = StyleSheet.create({
 		paddingLeft: 10
 	},
 	heading: {
-		fontSize: 18
+		fontSize: 18,
+		color: '#CE1126'
 	},
 	subheading: {
 		fontSize: 14

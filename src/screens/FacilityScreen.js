@@ -92,9 +92,9 @@ const styles = StyleSheet.create({
 	},
 	mapButton: {
 		marginVertical: 20,
-		padding: 20,
+		padding: 15,
 		borderRadius: 5,
-		backgroundColor: '#c09090',
+		backgroundColor: '#CE1126',
 		alignItems: 'center'
 	},
 	buttonText: {
