@@ -4,10 +4,36 @@ import {Picker} from '@react-native-picker/picker';
 
 const FilterDialog = ({dialogVisible, setDialogVisible, facilityFilter, setFacilityFilter}) => {
 	const [selectedFacilityType, setSelectedFacilityType] = useState();
+	const [selectedDistrict, setSelectedDistrict] = useState();
+	const [facilityTypeList, setFacilityTypeList] = useState([]);
+	const [districtList, setDistrictList] = useState([]);
+	
+	const sortPriorityFacilityType = (type) => {
+		if (type == "Central Hospital") {
+			return 1;
+		} else if (type == "District Hospital") {
+			return 2;
+		} else if (type.includes("Hospital")) {
+			return 3;
+		} else if (type == "Health Centre") {
+			return 4;
+		} else if (type == "Clinic") {
+			return 5;
+		} else if (type == "Dispensary") {
+			return 6;
+		} else {
+			return 9;
+		}
+	};
 	
 	useEffect(() => {
-		const facilityTypeList = require('../../assets/zipatala-facility-types.json');
-		console.log(facilityTypeList);
+		const dataFacilities = require('../../assets/zipatala-facility-types.json');
+		
+		setFacilityTypeList(dataFacilities.sort( (a, b) => sortPriorityFacilityType(a.facility_type) - sortPriorityFacilityType(b.facility_type) ));
+
+		const dataDistricts = require('../../assets/zipatala-districts.json');
+
+		setDistrictList(dataDistricts.sort( (a, b) => a.district_name > b.district_name ? 1 : -1 ));
 	}, []);
 
 	return (
@@ -29,31 +55,44 @@ const FilterDialog = ({dialogVisible, setDialogVisible, facilityFilter, setFacil
 				  onValueChange={(itemValue, itemIndex) =>
 					setSelectedFacilityType(itemValue)
 				  }>
-				  <Picker.Item label="<ALL>" value="<ALL>" />
-				  <Picker.Item label="Hospitals" value="Hospital" />
-				  <Picker.Item label="Clinics" value="Clinic" />
-				  <Picker.Item label="Health Centres" value="Health Centre" />
-				  <Picker.Item label="Dispensaries" value="Dispensary" />
-				  <Picker.Item label="Health Posts" value="Health Post" />
-				  <Picker.Item label="Maternity" value="Maternity" />				  
+				  <Picker.Item label="<ALL>" value="<ALL>" key="<ALL>" />
+				  {
+					  facilityTypeList.map((item, index) => {
+						  return <Picker.Item label={item.facility_type} value={item.facility_type} key={index} />
+					  })
+				  }
 				</Picker>
+				<Text style={styles.subHeading}>Filter by district:</Text>
+				<Picker
+				  style={styles.picker}
+				  selectedValue={selectedDistrict}
+				  onValueChange={(itemValue, itemIndex) =>
+					setSelectedDistrict(itemValue)
+				  }>
+				  <Picker.Item label="<ALL>" value="<ALL>" key="<ALL>" />
+				  {
+					  districtList.map((item, index) => {
+						  return <Picker.Item label={item.district_name} value={item.district_name} key={index} />
+					  })
+				  }
+				</Picker>				
 				<View style={styles.modalButtonsContainer}>
 					<TouchableOpacity
 						style={styles.modalCancelButton}
 						onPress={() => {
+							setFacilityFilter(null);
 							setDialogVisible(false);
 						}}
 						>
-						<Text style={styles.buttonText}>Cancel</Text>
+						<Text style={styles.buttonText}>Clear</Text>
 					</TouchableOpacity>
 					<TouchableOpacity
 						style={styles.modalButton}
-						onPress={() => {
-							if (selectedFacilityType == "<ALL>") {
-								setFacilityFilter(null);
-							} else {
-								setFacilityFilter({type: selectedFacilityType});
-							}
+						onPress={() => {						
+							setFacilityFilter({
+								type: selectedFacilityType == "<ALL>" ? null : selectedFacilityType,
+								district: selectedDistrict == "<ALL>" ? null : selectedDistrict
+							});
 							setDialogVisible(false);
 						}}
 						>

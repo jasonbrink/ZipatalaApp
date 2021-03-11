@@ -10,6 +10,7 @@ import {Picker} from '@react-native-picker/picker';
 
 const HomeScreen = ({ navigation }) => {
 	const [zipatalaDataComplete, setZipatalaDataComplete] = useState([]);
+	const [zipatalaDataFiltered, setZipatalaDataFiltered] = useState([]);
 	const [messageZipatala, setMessageZipatala] = useState('Waiting for Zipatala data...');
 	const [location, setLocation] = useState(null);
 	const [errorMsgLoc, setErrorMsgLoc] = useState('');
@@ -26,23 +27,41 @@ const HomeScreen = ({ navigation }) => {
 		console.log('Starting sortZipatala');
 		
 		/* First, ensure we have zipatala data AND location information */
-		if (zipatalaDataComplete.length == 0 || !location) {
+		if (zipatalaDataFiltered.length == 0 || !location) {
 			console.log('Abandoning sort as some data is not present');
-			console.log('Zipatala data length: ' + zipatalaDataComplete.length);
+			console.log('Zipatala data length: ' + zipatalaDataFiltered.length);
 			console.log(location);
 			return;
 		}
 
 		/* Add distance information to the whole list of businesses */
-		const withDist = zipatalaDataComplete.map((item) => {
+		const withDist = zipatalaDataFiltered.map((item) => {
 			item.dist = getDistance(location.coords, {lat: item.latitude, lng: item.longitude});
 			return item;
 		});
 
 		/* Finally, sort by distance */
-		setZipatalaDataComplete(withDist.sort( (a, b) => a.dist - b.dist ) );
+		setZipatalaDataFiltered(withDist.sort( (a, b) => a.dist - b.dist ) );
 		
 		setDataSorted(true);
+	};
+	
+	/*
+	 * If the facility data or the filter has changed, apply the filter to the complete list of facilities
+	 */
+	const filterFacilityData = () => {
+		setZipatalaDataFiltered(zipatalaDataComplete.filter(item => {
+			/* If there is no filter, include ALL facilities */
+			if (facilityFilter == null) {
+				return true;
+			} else {
+				return (facilityFilter.type == null || item.type == facilityFilter.type) &&
+					   (facilityFilter.district == null || item.district == facilityFilter.district);
+			}
+		}));
+		
+		/* Indicate that data needs re-sorting */
+		setDataSorted(false);
 	};
 
 	/*
@@ -53,20 +72,18 @@ const HomeScreen = ({ navigation }) => {
 			/*const response = await zipatala.get('/facilities/list');*/
 			/*setZipatalaDataComplete(response.data.data);*/
 			
-			/* Load data from an asset file first */
+			/* Load the complete data from an asset file first */
 			const response = require('../../assets/zipatala-facilities.json');
 			
-			/* Filter to only functional facilities */
-			const _zipatalaData = response.data.filter(result => {
-				return result.status == 'Functional';
+			/* Only include functional facilities */
+			const _zipatalaData = response.data.filter(item => {
+				return item.status == 'Functional';
 			});
 			
+			/* Store the complete list of facilities */
 			setZipatalaDataComplete(_zipatalaData);
 
 			setMessageZipatala('');
-			
-			/* Indicate that data needs re-sorting */
-			setDataSorted(false);
 		}
 		catch (err) {
 			console.log(err);
@@ -113,7 +130,8 @@ const HomeScreen = ({ navigation }) => {
 	useEffect(() => {
 		console.log("Facility filter:");
 		console.log(facilityFilter);
-	}, [facilityFilter]);
+		filterFacilityData();
+	}, [facilityFilter, zipatalaDataComplete]);
 
 
 	let locationText = 'Attempting to find your location...';
@@ -143,9 +161,9 @@ const HomeScreen = ({ navigation }) => {
 		<ActivityIndicator />
 		}
 
-		{zipatalaDataComplete.length == 0 ? <Text>{messageZipatala}</Text> : 
+		{zipatalaDataFiltered.length == 0 ? <Text>{messageZipatala}</Text> : 
 		<FlatList
-			data={zipatalaDataComplete.slice(0, Math.min(zipatalaDataComplete.length, _MAX_FACILITIES))}
+			data={zipatalaDataFiltered.slice(0, Math.min(zipatalaDataFiltered.length, _MAX_FACILITIES))}
 			keyExtractor={(facility) => facility.code}
 			renderItem={({ item }) => {
 				return (
