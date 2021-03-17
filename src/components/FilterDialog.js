@@ -130,7 +130,11 @@ const styles = StyleSheet.create({
 	picker: {
 		width: 250,
 		height: 200,
-		alignSelf: 'center'
+		alignSelf: 'center',
+		backgroundColor: '#eee',
+		borderRadius: 10,
+		margin: 0,
+		padding: 0
 	},
 	modalButtonsContainer: {
 		flexDirection: 'row',

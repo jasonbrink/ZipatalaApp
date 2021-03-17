@@ -1,7 +1,40 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Constants from '../config/constants';
 
 const DisclamerScreen = ({ navigation }) => {
+	const storeLastRunDate = async () => {
+		try {
+			const currentDate = new Date();
+			await AsyncStorage.setItem(Constants.AS_LastRunDate, currentDate.toString());
+		} catch (e) {
+			// saving error
+			console.log('Error saving data to AsyncStorage');
+			console.log(e);
+		}
+	}
+	
+	const getLastRunDate = async () => {
+		try {
+			const value = await AsyncStorage.getItem(Constants.AS_LastRunDate);
+			console.log('Last run date:');
+			console.log(value);
+		} catch(e) {
+			// error reading value
+			console.log('Error reading last run date from AsyncStorage');
+			console.log(e);
+		}
+	}
+	
+	
+	/* Code to run on first launch only */
+	useEffect(() => {
+		getLastRunDate();
+		
+		storeLastRunDate();
+	}, []);
+	
 	return (
 		<>
 			<View style={styles.imageContainer}>
@@ -31,10 +64,15 @@ const DisclamerScreen = ({ navigation }) => {
 	);
 };
 
+DisclamerScreen.navigationOptions = ({ navigation }) => ({
+    headerShown: false
+});
+
 const styles = StyleSheet.create({
 	imageContainer: {
 		flex: 2,
-		flexDirection: 'row'
+		flexDirection: 'row',
+		marginTop: 30
 	},
 	image: {
 		flex: 1,

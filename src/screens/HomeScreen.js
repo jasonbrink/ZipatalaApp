@@ -138,7 +138,7 @@ const HomeScreen = ({ navigation }) => {
 	if (errorMsgLoc) {
 		locationText = errorMsgLoc;
 	} else if (location) {
-		locationText = 'Got location! Lat: ' + location.coords.latitude + ' / Long: ' + location.coords.longitude;
+		locationText = null; /*'Got location! Lat: ' + location.coords.latitude + ' / Long: ' + location.coords.longitude;*/
 	}
 	
 	if (zipatalaDataComplete.length > 0 && location && !dataSorted) {
@@ -155,7 +155,9 @@ const HomeScreen = ({ navigation }) => {
 			setFacilityFilter={setFacilityFilter}
 		/>
 		
+		{ locationText &&
 		<Text>{locationText}</Text>
+		}
 
 		{ !location && !errorMsgLoc &&
 		<ActivityIndicator />
@@ -203,10 +205,13 @@ const HomeScreen = ({ navigation }) => {
 				</View>
 				);
 			}}
+			ListFooterComponent=
+				<View>
+					{zipatalaDataFiltered.length > _MAX_FACILITIES &&
+					<Text style={styles.footerText}>Maximum of {_MAX_FACILITIES} facilities shown. Use filters to further restrict your search.</Text>
+					}
+				</View>
 		/>
-		}
-		{zipatalaDataComplete.length > _MAX_FACILITIES &&
-		<Text>Maximum of {_MAX_FACILITIES} shown. Use filters to further restrict your search.</Text>
 		}
 	</View>
 	);
@@ -214,7 +219,10 @@ const HomeScreen = ({ navigation }) => {
 
 
 HomeScreen.navigationOptions = ({ navigation }) => ({
-    headerRight: () => (
+    headerLeft: () => (
+		<Feather name="menu" style={styles.iconStyle} />
+	),
+	headerRight: () => (
 		<TouchableOpacity
 				onPress={() => {
 					let displayFilter = navigation.getParam('setFilterDialogVisible');
@@ -235,7 +243,7 @@ const styles = StyleSheet.create({
 	facilityContainer: {
 		borderTopWidth: 1,
 		borderTopColor: '#ccc',
-		marginTop: 10,
+		marginBottom: 10,
 		paddingTop: 10,
 		paddingLeft: 10
 	},
@@ -266,7 +274,11 @@ const styles = StyleSheet.create({
 	},
 	iconStyle: {
 		fontSize: 28,
-		marginHorizontal: 10
+		marginHorizontal: 10,
+		color: '#fff'
+	},
+	footerText: {
+		margin: 10
 	}
 });
 

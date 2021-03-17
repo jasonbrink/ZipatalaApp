@@ -68,6 +68,10 @@ const FacilityScreen = ({ navigation }) => {
 	);
 };
 
+FacilityScreen.navigationOptions = ({ navigation }) => ({
+    title: 'Facility Details'
+});
+
 const styles = StyleSheet.create({
 	container: {
 		padding: 10,

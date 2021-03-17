@@ -13,7 +13,11 @@ const navigator = createStackNavigator(
   {
     initialRouteName: 'Disclamer',
     defaultNavigationOptions: {
-      title: 'Zipatala Malawi Facilities'
+      title: 'Zipatala Health Facilities',
+	  headerStyle: {
+		backgroundColor: '#CE1126'
+	  },
+	  headerTintColor: '#fff'
     }
   }
 );
