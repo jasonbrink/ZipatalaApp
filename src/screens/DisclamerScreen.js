@@ -55,7 +55,7 @@ const DisclamerScreen = ({ navigation }) => {
 			<View style={styles.buttonContainer}>
 				<TouchableOpacity
 					style={styles.button}
-					onPress={() => navigation.replace('Home')}
+					onPress={() => navigation.navigate('MainApp')}
 					>
 					<Text style={styles.buttonText}>I Understand, Continue</Text>
 				</TouchableOpacity>

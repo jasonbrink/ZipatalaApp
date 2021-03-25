@@ -205,12 +205,12 @@ const HomeScreen = ({ navigation }) => {
 				</View>
 				);
 			}}
-			ListFooterComponent=
+			ListFooterComponent={
 				<View>
 					{zipatalaDataFiltered.length > _MAX_FACILITIES &&
 					<Text style={styles.footerText}>Maximum of {_MAX_FACILITIES} facilities shown. Use filters to further restrict your search.</Text>
 					}
-				</View>
+				</View>}
 		/>
 		}
 	</View>
@@ -220,7 +220,7 @@ const HomeScreen = ({ navigation }) => {
 
 HomeScreen.navigationOptions = ({ navigation }) => ({
     headerLeft: () => (
-		<Feather name="menu" style={styles.iconStyle} />
+		<Feather name="menu" style={styles.iconStyle} onPress={() => navigation.openDrawer()} />
 	),
 	headerRight: () => (
 		<TouchableOpacity
