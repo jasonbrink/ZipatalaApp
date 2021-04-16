@@ -1,13 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Constants from '../config/constants';
 
 const DisclamerScreen = ({ navigation }) => {
-	const storeLastRunDate = async () => {
+	const [showDisclaimer, setShowDisclaimer] = useState(false);
+
+	const handleDisclaimerButton = async () => {
 		try {
-			const currentDate = new Date();
-			await AsyncStorage.setItem(Constants.AS_LastRunDate, currentDate.toString());
+			/* If the button has been pressed, store that the user has accepted the disclaimer */
+			await AsyncStorage.setItem(Constants.AS_AcceptedDisclaimer, "true");
+
+			/* Then, navigate onward to the main part of the app */
+			navigation.navigate('MainApp');
 		} catch (e) {
 			// saving error
 			console.log('Error saving data to AsyncStorage');
@@ -15,28 +20,32 @@ const DisclamerScreen = ({ navigation }) => {
 		}
 	}
 	
-	const getLastRunDate = async () => {
+	const checkIfAcceptedDisclaimer = async () => {
 		try {
-			const value = await AsyncStorage.getItem(Constants.AS_LastRunDate);
-			console.log('Last run date:');
-			console.log(value);
+			const value = await AsyncStorage.getItem(Constants.AS_AcceptedDisclaimer);
+			if (value) {
+				console.log("Disclaimer already accepted. Skipping...");
+				navigation.navigate('MainApp');
+			} else {
+				setShowDisclaimer(true);
+			}
 		} catch(e) {
 			// error reading value
-			console.log('Error reading last run date from AsyncStorage');
+			console.log('Error reading AcceptedDisclaimer from AsyncStorage');
 			console.log(e);
 		}
 	}
 	
 	
-	/* Code to run on first launch only */
+	/* When first run, check if we should actually skip the disclaimer */
 	useEffect(() => {
-		getLastRunDate();
-		
-		storeLastRunDate();
+		checkIfAcceptedDisclaimer();
 	}, []);
 	
 	return (
 		<>
+			{ showDisclaimer &&
+			<>
 			<View style={styles.imageContainer}>
 				<Image 
 					style={styles.image}
@@ -55,11 +64,13 @@ const DisclamerScreen = ({ navigation }) => {
 			<View style={styles.buttonContainer}>
 				<TouchableOpacity
 					style={styles.button}
-					onPress={() => navigation.navigate('MainApp')}
+					onPress={() => handleDisclaimerButton()}
 					>
 					<Text style={styles.buttonText}>I Understand, Continue</Text>
 				</TouchableOpacity>
 			</View>
+			</>
+			}
 		</>
 	);
 };
