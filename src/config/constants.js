@@ -7,9 +7,9 @@ export const ZipatalaAssetFilesDate = new Date('25 February 2021 7:00 pm');
 export const RefreshDataWhenDaysOld = 1;
 
 // AsyncStorage Keys
-export const AS_LastRunDate = 'LastRunDate';
 export const AS_LastDataUpdatedDate = 'LastDataUpdatedDate';
 export const AS_ZipatalaFacilitiesList = 'ZipatalaFacilitiesList';
+export const AS_AcceptedDisclaimer = 'AcceptedDisclaimer';
 
 // Standard red color used throughout the app
 export const PrimaryColor = '#CE1126';
