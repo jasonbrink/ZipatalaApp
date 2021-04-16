@@ -2,15 +2,15 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
-const SettingsScreen = ({ navigation }) => {
+const FeedbackScreen = ({ navigation }) => {
 	return (
 		<View>
-			<Text>Settings Page</Text>
+			<Text>Feedback Page</Text>
 		</View>
 	);
 };
 
-SettingsScreen.navigationOptions = ({ navigation }) => ({
+FeedbackScreen.navigationOptions = ({ navigation }) => ({
     headerLeft: () => (
 		<Feather name="menu" style={styles.iconStyle} onPress={() => navigation.openDrawer()} />
 	)
@@ -25,4 +25,4 @@ const styles = StyleSheet.create({
 	}
 });
 
-export default SettingsScreen;
+export default FeedbackScreen;

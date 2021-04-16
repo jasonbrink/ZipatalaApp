@@ -6,7 +6,8 @@ import { createDrawerNavigator, DrawerItems } from 'react-navigation-drawer';
 import HomeScreen from './src/screens/HomeScreen';
 import DisclamerScreen from './src/screens/DisclamerScreen';
 import FacilityScreen from './src/screens/FacilityScreen';
-import SettingsScreen from './src/screens/SettingsScreen';
+import FeedbackScreen from './src/screens/FeedbackScreen';
+import AboutScreen from './src/screens/AboutScreen';
 
 /*
  * This is the stack navigator for the main part of the app. It includes the Home screen, plus the facility detail
@@ -29,22 +30,26 @@ const mainStack = createStackNavigator(
 );
 
 /*
- * Create a stack navigator for the Settings page. This is not really necessary, but seems to be
- * the only way to get the header bar to show up
+ * Create a stack navigator for other pages accessed from the menu. These
+ * pages don't really need it, but seems to be the only way to get the 
+ * header bar to show up
  */
-const settingsStack = createStackNavigator(
-	{
-		Settings: SettingsScreen
-	},
-	{
-	  defaultNavigationOptions: {
-		title: 'Settings',
-		headerStyle: {
-		  backgroundColor: '#CE1126'
-		},
+const feedbackStack = createStackNavigator(
+	{ Feedback: FeedbackScreen },
+	{ defaultNavigationOptions: {
+		title: 'Feedback',
+		headerStyle: { backgroundColor: '#CE1126' },
 		headerTintColor: '#fff'
-	  }
-	}
+	}}
+);
+
+const aboutStack = createStackNavigator(
+	{ About: AboutScreen },
+	{ defaultNavigationOptions: {
+		title: 'About',
+		headerStyle: { backgroundColor: '#CE1126' },
+		headerTintColor: '#fff'
+	}}
 );
 
 /*
@@ -58,7 +63,7 @@ const drawerNavigationContent = (props) => {
 			<View style={{ margin: 20 }}>
 			</View>
 			<ScrollView>
-				<DrawerItems {...props} labelStyle={{ fontSize: 20 }} />
+				<DrawerItems {...props} labelStyle={{ fontSize: 20 }} activeTintColor='#CE1126' />
 			</ScrollView>
 		</SafeAreaView>
 	);
@@ -71,7 +76,8 @@ const drawerNavigationContent = (props) => {
  */
 const mainDrawerNavigator = createDrawerNavigator({
 	Home: mainStack,
-	Settings: settingsStack
+	Feedback: feedbackStack,
+	About: aboutStack
 },
 {
 	drawerPosition: 'left',

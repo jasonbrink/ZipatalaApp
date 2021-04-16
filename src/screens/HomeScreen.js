@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import * as Location from 'expo-location';
 import { getDistance } from 'geolib';
-import zipatala from '../api/zipatala';
 import FilterDialog from '../components/FilterDialog';
 import HealthFacilityImage from '../components/HealthFacilityImage'
-import {Picker} from '@react-native-picker/picker';
+import * as Constants from '../config/constants';
+import zipatala from '../api/zipatala';
+
 
 const HomeScreen = ({ navigation }) => {
 	const [zipatalaDataComplete, setZipatalaDataComplete] = useState([]);
@@ -24,8 +26,6 @@ const HomeScreen = ({ navigation }) => {
 	 * Sort Zipatala data based on distance from current location
 	 */
 	const sortZipatalaByDistance = () => {
-		console.log('Starting sortZipatala');
-		
 		/* First, ensure we have zipatala data AND location information */
 		if (zipatalaDataFiltered.length == 0 || !location) {
 			console.log('Abandoning sort as some data is not present');
@@ -64,34 +64,114 @@ const HomeScreen = ({ navigation }) => {
 		setDataSorted(false);
 	};
 
+
 	/*
-	 * Get data from the Zipatala API
+	 * We can get raw data a few ways - from the API, from AsyncStorage, or from an asset file. In any case,
+	 * we take a few steps to process it.
+	 */
+	const processRawZipatalaData = (rawData) => {
+		/* Next, filter the raw data to only include facilities that are actually functional */
+		const _zipatalaData = rawData.data.filter(item => {
+			return item.status == 'Functional';
+		});
+
+		console.log("Number of facilities:");
+		console.log(_zipatalaData.length);
+		
+		/* Store the complete list of facilities */
+		setZipatalaDataComplete(_zipatalaData);
+	};
+
+
+	/*
+	 * This function will first check if the Zipatala data needs to be refresh (ie. if it has never
+	 * been loaded from the API, or the last refresh is too old). If so, it will initaite an API call
+	 * and stored the resulting data.
+	 */
+	const refreshZipatalaData = async() => {
+		try {
+			/* First, check to see the date when the Zipatala data was last updated from the server */
+			const lastUpdatedDate = await AsyncStorage.getItem(Constants.AS_LastDataUpdatedDate);
+
+			/* Initialize daysOld to a large number. If we've never gotten data from the server, this
+			 * will trigger a refresh. */
+			let daysOld = 999;
+
+			/* If there is a last updated date, and it is within the last 3 days, try to use the stored data */
+			if (lastUpdatedDate) {
+				const today = new Date();
+				/* Take the difference between the dates and divide by milliseconds per day.
+				 * Round to nearest whole number to deal with DST. */
+				daysOld = Math.round((today-new Date(lastUpdatedDate))/(1000*60*60*24));
+
+				console.log("It appears data was last updated on " + lastUpdatedDate);
+				console.log("This means data is " + daysOld + " days old.");
+			}
+
+
+			if (daysOld >= Constants.RefreshDataWhenDaysOld) {
+				console.log("Querying API for fresh Zipatala data...");
+
+				/* We want to get updated data, so call the API. */
+				const response = await zipatala.get('/facilities/list');
+			
+				if (response) {
+					const currentDate = new Date();
+					console.log("Got response. Storing...");
+		
+					await AsyncStorage.setItem(Constants.AS_ZipatalaFacilitiesList, JSON.stringify(response.data));
+					console.log("Stored!");
+					await AsyncStorage.setItem(Constants.AS_LastDataUpdatedDate, currentDate.toString());
+					console.log("Set last date");
+
+					/* Finally, process the data so it will be displayed on the screen */
+					processRawZipatalaData(response.data);
+				} else {
+					console.log('Response not received from Zipatala API');
+				}
+	
+			}
+			
+		} catch(err) {
+			console.log("Error in refreshing Zipatala data");
+			console.log(err);
+		}
+	};
+
+
+	/*
+	 * Get all the Zipatala data. The goal here is to get data on the screen as quickly as possible from
+	 * local cache, and then try to download updated data if the last update is old
 	 */
 	const getZipatalaData = async() => {
 		try {
-			/*const response = await zipatala.get('/facilities/list');*/
-			/*setZipatalaDataComplete(response.data.data);*/
-			
-			/* Load the complete data from an asset file first */
-			const response = require('../../assets/zipatala-facilities.json');
-			
-			/* Only include functional facilities */
-			const _zipatalaData = response.data.filter(item => {
-				return item.status == 'Functional';
-			});
-			
-			/* Store the complete list of facilities */
-			setZipatalaDataComplete(_zipatalaData);
+			let rawData = null;
+
+			/* First, try to load data from AsyncStorage, from whenever the last call to the server was */
+			const storedData = await AsyncStorage.getItem(Constants.AS_ZipatalaFacilitiesList);
+			if (storedData) {
+				rawData = JSON.parse(storedData);
+				console.log("Got data from AsyncStorage");
+			} else {
+				/* If there is nothing in AsyncStorage, use the data in the asset file distributed with the app */
+				rawData = require('../../assets/zipatala-facilities.json');
+				console.log("Got data from asset file");
+			}
+
+			processRawZipatalaData(rawData);
 
 			setMessageZipatala('');
+
+			/* Now that we have SOMETHING available to display, see if we might need to REFRESH the data */
+			refreshZipatalaData();
 		}
 		catch (err) {
 			console.log(err);
-			setMessageZipatala('Something went wrong with Zipatala request');
+			setMessageZipatala('Something went wrong getting Zipatala health facility data');
 		}
 	};
 	
-	
+
 	/*
 	 * Get the current location of the user
 	 */
@@ -128,8 +208,6 @@ const HomeScreen = ({ navigation }) => {
 	}, []);
 
 	useEffect(() => {
-		console.log("Facility filter:");
-		console.log(facilityFilter);
 		filterFacilityData();
 	}, [facilityFilter, zipatalaDataComplete]);
 
