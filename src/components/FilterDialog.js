@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Modal, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, Modal, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 
 const FilterDialog = ({dialogVisible, setDialogVisible, facilityFilter, setFacilityFilter}) => {
@@ -129,12 +129,14 @@ const styles = StyleSheet.create({
 	},
 	picker: {
 		width: 250,
-		height: 200,
+		height: Platform.OS === 'ios' ? 200 : 40,
 		alignSelf: 'center',
 		backgroundColor: '#eee',
 		borderRadius: 10,
-		margin: 0,
-		padding: 0
+		marginVertical: Platform.OS === 'ios' ? 0 : 10,
+		marginHorizontal: 0,
+		padding: 0,
+		elevation: 10
 	},
 	modalButtonsContainer: {
 		flexDirection: 'row',
