@@ -6,7 +6,7 @@ import * as Location from 'expo-location';
 import { getDistance } from 'geolib';
 import FilterDialog from '../components/FilterDialog';
 import HealthFacilityImage from '../components/HealthFacilityImage'
-import * as Constants from '../config/constants';
+import * as ZipatalaConstants from '../config/constants';
 import zipatala from '../api/zipatala';
 
 
@@ -91,7 +91,7 @@ const HomeScreen = ({ navigation }) => {
 	const refreshZipatalaData = async() => {
 		try {
 			/* First, check to see the date when the Zipatala data was last updated from the server */
-			const lastUpdatedDate = await AsyncStorage.getItem(Constants.AS_LastDataUpdatedDate);
+			const lastUpdatedDate = await AsyncStorage.getItem(ZipatalaConstants.AS_LastDataUpdatedDate);
 
 			/* Initialize daysOld to a large number. If we've never gotten data from the server, this
 			 * will trigger a refresh. */
@@ -109,7 +109,7 @@ const HomeScreen = ({ navigation }) => {
 			}
 
 
-			if (daysOld >= Constants.RefreshDataWhenDaysOld) {
+			if (daysOld >= ZipatalaConstants.RefreshDataWhenDaysOld) {
 				console.log("Querying API for fresh Zipatala data...");
 
 				/* We want to get updated data, so call the API. */
@@ -119,9 +119,9 @@ const HomeScreen = ({ navigation }) => {
 					const currentDate = new Date();
 					console.log("Got response. Storing...");
 		
-					await AsyncStorage.setItem(Constants.AS_ZipatalaFacilitiesList, JSON.stringify(response.data));
+					await AsyncStorage.setItem(ZipatalaConstants.AS_ZipatalaFacilitiesList, JSON.stringify(response.data));
 					console.log("Stored!");
-					await AsyncStorage.setItem(Constants.AS_LastDataUpdatedDate, currentDate.toString());
+					await AsyncStorage.setItem(ZipatalaConstants.AS_LastDataUpdatedDate, currentDate.toString());
 					console.log("Set last date");
 
 					/* Finally, process the data so it will be displayed on the screen */
@@ -148,7 +148,7 @@ const HomeScreen = ({ navigation }) => {
 			let rawData = null;
 
 			/* First, try to load data from AsyncStorage, from whenever the last call to the server was */
-			const storedData = await AsyncStorage.getItem(Constants.AS_ZipatalaFacilitiesList);
+			const storedData = await AsyncStorage.getItem(ZipatalaConstants.AS_ZipatalaFacilitiesList);
 			if (storedData) {
 				rawData = JSON.parse(storedData);
 				console.log("Got data from AsyncStorage");

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Constants from '../config/constants';
+import * as ZipatalaConstants from '../config/constants';
 
 const DisclamerScreen = ({ navigation }) => {
 	const [showDisclaimer, setShowDisclaimer] = useState(false);
@@ -9,7 +9,7 @@ const DisclamerScreen = ({ navigation }) => {
 	const handleDisclaimerButton = async () => {
 		try {
 			/* If the button has been pressed, store that the user has accepted the disclaimer */
-			await AsyncStorage.setItem(Constants.AS_AcceptedDisclaimer, "true");
+			await AsyncStorage.setItem(ZipatalaConstants.AS_AcceptedDisclaimer, "true");
 
 			/* Then, navigate onward to the main part of the app */
 			navigation.navigate('MainApp');
@@ -22,7 +22,7 @@ const DisclamerScreen = ({ navigation }) => {
 	
 	const checkIfAcceptedDisclaimer = async () => {
 		try {
-			const value = await AsyncStorage.getItem(Constants.AS_AcceptedDisclaimer);
+			const value = await AsyncStorage.getItem(ZipatalaConstants.AS_AcceptedDisclaimer);
 			if (value) {
 				console.log("Disclaimer already accepted. Skipping...");
 				navigation.navigate('MainApp');
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
 	image: {
 		flex: 1,
 		margin: 30,
-		height: 130
+		height: "85%"
 	},
 	disclamerContainer: {
 		flex: 4,

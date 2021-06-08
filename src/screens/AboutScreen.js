@@ -2,16 +2,15 @@ import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { Feather } from '@expo/vector-icons';
-import * as Constants from '../config/constants';
+import * as ZipatalaConstants from '../config/constants';
+import Constants from 'expo-constants';
 
 const AboutScreen = ({ navigation }) => {
-	const [lastUpdatedDate, setLastUpdatedDate] = useState(new Date(Constants.ZipatalaAssetFilesDate));
-
-	const appInfo = require('../../app.json');
+	const [lastUpdatedDate, setLastUpdatedDate] = useState(new Date(ZipatalaConstants.ZipatalaAssetFilesDate));
 
 	const getLastUpdatedDate = async () => {
 		try {
-			const value = await AsyncStorage.getItem(Constants.AS_LastDataUpdatedDate);
+			const value = await AsyncStorage.getItem(ZipatalaConstants.AS_LastDataUpdatedDate);
 			if (value) {
 				setLastUpdatedDate(new Date(value));
 			}
@@ -45,7 +44,7 @@ const AboutScreen = ({ navigation }) => {
 				</TouchableOpacity>
 			</View>
 			<View style={styles.debugSection}>
-				<Text style={styles.smallText}>App version: {appInfo.expo.version}</Text>
+				<Text style={styles.smallText}>App version: {Constants.manifest.version}</Text>
 				<Text style={styles.smallText}>Zipatala data last updated: {lastUpdatedDate.toLocaleDateString("en-GB", { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: 'numeric'})}</Text>
 			</View>
 		</View>
