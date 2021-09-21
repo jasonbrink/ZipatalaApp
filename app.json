@@ -2,7 +2,7 @@
   "expo": {
     "name": "Zipatala",
     "slug": "zipatala-health-facilities",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "primaryColor": "#CE1126",
     "icon": "./assets/icon.png",
@@ -20,15 +20,17 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "io.zotech.zipatala",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.2"
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
-      },
+      "permissions": ["ACCESS_FINE_LOCATION"],
       "package": "io.zotech.zipatala",
-      "versionCode": 1
+      "versionCode": 2,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon_foreground.png",
+        "backgroundImage": "./assets/icon_background.png"
+      },
+      "icon": "./assets/ic_launcher_round.png"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 const FeedbackScreen = ({ navigation }) => {
@@ -66,7 +66,8 @@ const FeedbackScreen = ({ navigation }) => {
 			<TouchableOpacity
 				style={styles.buttonDisabled}
 				>
-				<Text style={styles.buttonText}>Submit</Text>
+				<Text style={styles.buttonText}>Submitting</Text>
+				<ActivityIndicator />
 			</TouchableOpacity>
 			:
 			<TouchableOpacity
